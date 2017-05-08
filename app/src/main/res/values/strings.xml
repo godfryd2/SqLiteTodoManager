@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Aplikacja</string>
+    <string name="app_name">ToDoManager</string>
     <string name="button_add">New task</string>
     <string name="button_clear">Clear completed</string>
     <string name="edittext_hint_new_task">Type here your new task...</string>
