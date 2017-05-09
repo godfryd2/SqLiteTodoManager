@@ -1,55 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
     <ListView
-        android:layout_width="fill_parent"
         android:id="@+id/lvTodos"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"></ListView>
-    <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"></ListView>
+
+    <EditText
         android:id="@+id/etNewTask"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:hint="@string/edittext_hint_new_task"
         android:visibility="gone">
+
         <requestFocus></requestFocus>
     </EditText>
+
     <LinearLayout
+        android:id="@+id/llNewTaskButtons"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/llNewTaskButtons"
         android:visibility="gone">
+
         <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:id="@+id/btnSave"
-            android:text="@string/button_save"></Button>
-        <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:text="@string/button_save"></Button>
+
+        <Button
             android:id="@+id/btnCancel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/button_cancel"></Button>
     </LinearLayout>
+
     <LinearLayout
+        android:id="@+id/llControlButtons"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/llControlButtons">
+        android:layout_height="wrap_content">
+
         <Button
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:id="@+id/btnAddNew"
-            android:text="@string/button_add"
-            android:layout_width="fill_parent"></Button>
-        <Button
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:text="@string/button_add"></Button>
+
+        <Button
             android:id="@+id/btnClearCompleted"
-            android:text="@string/button_clear"
-            android:layout_width="fill_parent"></Button>
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/button_clear"></Button>
     </LinearLayout>
 </LinearLayout>
