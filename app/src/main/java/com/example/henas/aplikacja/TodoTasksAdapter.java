@@ -26,6 +26,7 @@ public class TodoTasksAdapter extends ArrayAdapter<TodoTask> {
 
     static class ViewHolder {
         public TextView tvTodoDescription;
+        public TextView tvTodoDate;
     }
 
     @Override
@@ -37,19 +38,27 @@ public class TodoTasksAdapter extends ArrayAdapter<TodoTask> {
             rowView = layoutInflater.inflate(R.layout.todo_list_item, null, true);
             viewHolder = new ViewHolder();
             viewHolder.tvTodoDescription = (TextView) rowView.findViewById(R.id.tvTodoDescription);
+            viewHolder.tvTodoDate = (TextView) rowView.findViewById(R.id.tvTodoDate);
             rowView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) rowView.getTag();
         }
         TodoTask task = tasks.get(position);
         viewHolder.tvTodoDescription.setText(task.getDescription());
+        viewHolder.tvTodoDate.setText(task.getDate());
         if(task.isCompleted()) {
             viewHolder.tvTodoDescription
                     .setPaintFlags(viewHolder.tvTodoDescription.getPaintFlags() |
                             Paint.STRIKE_THRU_TEXT_FLAG);
+            viewHolder.tvTodoDate
+                    .setPaintFlags(viewHolder.tvTodoDate.getPaintFlags() |
+                            Paint.STRIKE_THRU_TEXT_FLAG);
         } else {
             viewHolder.tvTodoDescription
                     .setPaintFlags(viewHolder.tvTodoDescription.getPaintFlags() &
+                            ~Paint.STRIKE_THRU_TEXT_FLAG);
+            viewHolder.tvTodoDate
+                    .setPaintFlags(viewHolder.tvTodoDate.getPaintFlags() &
                             ~Paint.STRIKE_THRU_TEXT_FLAG);
         }
         return rowView;

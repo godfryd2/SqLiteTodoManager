@@ -6,4 +6,5 @@
     <string name="edittext_hint_new_task">Wpisz nazwę zadania...</string>
     <string name="button_save">Zapisz zadanie</string>
     <string name="button_cancel">Anuluj</string>
+    <string name="edittext_hint_new_task_date">Podaj datę...</string>
 </resources>

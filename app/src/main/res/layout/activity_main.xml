@@ -20,6 +20,16 @@
         <requestFocus></requestFocus>
     </EditText>
 
+    <EditText
+        android:id="@+id/etNewTaskDate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/edittext_hint_new_task_date"
+        android:visibility="gone">
+
+        <requestFocus></requestFocus>
+    </EditText>
+
     <LinearLayout
         android:id="@+id/llNewTaskButtons"
         android:layout_width="fill_parent"

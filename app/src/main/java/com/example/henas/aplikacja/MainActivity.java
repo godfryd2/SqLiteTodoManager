@@ -1,6 +1,5 @@
 package com.example.henas.aplikacja;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import com.example.henas.aplikacja.model.TodoTask;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -28,6 +26,7 @@ public class MainActivity extends Activity {
     private Button btnSave;
     private Button btnCancel;
     private EditText etNewTask;
+    private EditText etNewTaskDate;
     private ListView lvTodos;
     private LinearLayout llControlButtons;
     private LinearLayout llNewTaskButtons;
@@ -52,6 +51,7 @@ public class MainActivity extends Activity {
         btnSave = (Button) findViewById(R.id.btnSave);
         btnCancel = (Button) findViewById(R.id.btnCancel);
         etNewTask = (EditText) findViewById(R.id.etNewTask);
+        etNewTaskDate = (EditText) findViewById(R.id.etNewTaskDate);
         lvTodos = (ListView) findViewById(R.id.lvTodos);
         llControlButtons = (LinearLayout) findViewById(R.id.llControlButtons);
         llNewTaskButtons = (LinearLayout) findViewById(R.id.llNewTaskButtons);
@@ -90,8 +90,9 @@ public class MainActivity extends Activity {
             do {
                 long id = todoCursor.getLong(TodoDbAdapter.ID_COLUMN);
                 String description = todoCursor.getString(TodoDbAdapter.DESCRIPTION_COLUMN);
+                String date = todoCursor.getString(TodoDbAdapter.DATE_COLUMN);
                 boolean completed = todoCursor.getInt(TodoDbAdapter.COMPLETED_COLUMN) > 0 ? true : false;
-                tasks.add(new TodoTask(id, description, completed));
+                tasks.add(new TodoTask(id, description, date, completed));
             } while(todoCursor.moveToNext());
         }
     }
@@ -110,9 +111,9 @@ public class MainActivity extends Activity {
                                     long id) {
                 TodoTask task = tasks.get(position);
                 if(task.isCompleted()){
-                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), false);
+                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), false);
                 } else {
-                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), true);
+                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), true);
                 }
                 updateListViewData();
             }
@@ -158,12 +159,14 @@ public class MainActivity extends Activity {
         setVisibilityOf(llControlButtons, false);
         setVisibilityOf(llNewTaskButtons, true);
         setVisibilityOf(etNewTask, true);
+        setVisibilityOf(etNewTaskDate, true);
     }
 
     private void showOnlyControlPanel() {
         setVisibilityOf(llControlButtons, true);
         setVisibilityOf(llNewTaskButtons, false);
         setVisibilityOf(etNewTask, false);
+        setVisibilityOf(etNewTaskDate, false);
     }
 
     private void setVisibilityOf(View v, boolean visible) {
@@ -174,6 +177,7 @@ public class MainActivity extends Activity {
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(etNewTask.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(etNewTaskDate.getWindowToken(), 0);
     }
 
     private void addNewTask(){
@@ -182,19 +186,25 @@ public class MainActivity extends Activity {
 
     private void saveNewTask(){
         String taskDescription = etNewTask.getText().toString();
+        String taskDate = etNewTaskDate.getText().toString();
         if(taskDescription.equals("")){
             etNewTask.setError("Your task description couldn't be empty string.");
+        } else if(taskDate.equals("")) {
+            etNewTaskDate.setError("Your task date couldn't be empty string.");
         } else {
-            todoDbAdapter.insertTodo(taskDescription);
+            todoDbAdapter.insertTodo(taskDescription, taskDate);
             etNewTask.setText("");
+            etNewTaskDate.setText("");
             hideKeyboard();
             showOnlyControlPanel();
         }
+
         updateListViewData();
     }
 
     private void cancelNewTask() {
         etNewTask.setText("");
+        etNewTaskDate.setText("");
         showOnlyControlPanel();
     }
 

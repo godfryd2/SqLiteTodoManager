@@ -7,11 +7,13 @@ package com.example.henas.aplikacja.model;
 public class TodoTask {
     private long id;
     private String description;
+    private String date;
     private boolean completed;
 
-    public TodoTask(long id, String description, boolean completed) {
+    public TodoTask(long id, String description, String date, boolean completed) {
         this.id = id;
         this.description = description;
+        this.date = date;
         this.completed = completed;
     }
 
@@ -29,6 +31,14 @@ public class TodoTask {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public boolean isCompleted() {

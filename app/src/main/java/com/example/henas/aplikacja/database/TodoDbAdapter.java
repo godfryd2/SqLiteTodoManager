@@ -8,6 +8,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import java.sql.Date;
 import java.sql.SQLException;
 import com.example.henas.aplikacja.model.TodoTask;
 import android.content.ContentValues;
@@ -26,19 +28,27 @@ public class TodoDbAdapter {
     private static final String DB_TODO_TABLE = "todo";
 
     public static final String KEY_ID = "_id";
+
     public static final String ID_OPTIONS = "INTEGER PRIMARY KEY AUTOINCREMENT";
     public static final int ID_COLUMN = 0;
+
     public static final String KEY_DESCRIPTION = "description";
     public static final String DESCRIPTION_OPTIONS = "TEXT NOT NULL";
     public static final int DESCRIPTION_COLUMN = 1;
+
+    public static final String KEY_DATE = "date";
+    public static final String DATE_OPTIONS = "TEXT NOT NULL";
+    public static final int DATE_COLUMN = 2;
+
     public static final String KEY_COMPLETED = "completed";
     public static final String COMPLETED_OPTIONS = "INTEGER DEFAULT 0";
-    public static final int COMPLETED_COLUMN = 2;
+    public static final int COMPLETED_COLUMN = 3;
 
     private static final String DB_CREATE_TODO_TABLE =
             "CREATE TABLE " + DB_TODO_TABLE + "( " +
                     KEY_ID + " " + ID_OPTIONS + ", " +
                     KEY_DESCRIPTION + " " + DESCRIPTION_OPTIONS + ", " +
+                    KEY_DATE + " " + DATE_OPTIONS + ", " +
                     KEY_COMPLETED + " " + COMPLETED_OPTIONS +
                     ");";
     private static final String DROP_TODO_TABLE =
@@ -92,24 +102,27 @@ public class TodoDbAdapter {
         dbHelper.close();
     }
 
-    public long insertTodo(String description) {
+    public long insertTodo(String description, String date) {
         ContentValues newTodoValues = new ContentValues();
         newTodoValues.put(KEY_DESCRIPTION, description);
+        newTodoValues.put(KEY_DATE, date);
         return db.insert(DB_TODO_TABLE, null, newTodoValues);
     }
 
     public boolean updateTodo(TodoTask task) {
         long id = task.getId();
         String description = task.getDescription();
+        String date = task.getDate();
         boolean completed = task.isCompleted();
-        return updateTodo(id, description, completed);
+        return updateTodo(id, description, date, completed);
     }
 
-    public boolean updateTodo(long id, String description, boolean completed) {
+    public boolean updateTodo(long id, String description, String date, boolean completed) {
         String where = KEY_ID + "=" + id;
         int completedTask = completed ? 1 : 0;
         ContentValues updateTodoValues = new ContentValues();
         updateTodoValues.put(KEY_DESCRIPTION, description);
+        updateTodoValues.put(KEY_DATE, date);
         updateTodoValues.put(KEY_COMPLETED, completedTask);
         return db.update(DB_TODO_TABLE, updateTodoValues, where, null) > 0;
     }
@@ -120,19 +133,20 @@ public class TodoDbAdapter {
     }
 
     public Cursor getAllTodos() {
-        String[] columns = {KEY_ID, KEY_DESCRIPTION, KEY_COMPLETED};
+        String[] columns = {KEY_ID, KEY_DESCRIPTION, KEY_DATE, KEY_COMPLETED};
         return db.query(DB_TODO_TABLE, columns, null, null, null, null, null);
     }
 
     public TodoTask getTodo(long id) {
-        String[] columns = {KEY_ID, KEY_DESCRIPTION, KEY_COMPLETED};
+        String[] columns = {KEY_ID, KEY_DESCRIPTION, KEY_DATE, KEY_COMPLETED};
         String where = KEY_ID + "=" + id;
         Cursor cursor = db.query(DB_TODO_TABLE, columns, where, null, null, null, null);
         TodoTask task = null;
         if(cursor != null && cursor.moveToFirst()) {
             String description = cursor.getString(DESCRIPTION_COLUMN);
+            String date = cursor.getString(DATE_COLUMN);
             boolean completed = cursor.getInt(COMPLETED_COLUMN) > 0 ? true : false;
-            task = new TodoTask(id, description, completed);
+            task = new TodoTask(id, description, date, completed);
         }
         return task;
     }
