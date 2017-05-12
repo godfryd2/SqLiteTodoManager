@@ -1,34 +1,27 @@
 package com.example.henas.aplikacja;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.example.henas.aplikacja.database.TodoDbAdapter;
 import com.example.henas.aplikacja.model.TodoTask;
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
 public class MainActivity extends Activity {
     private Button btnAddNew;
     private Button btnClearCompleted;
-    private Button btnSave;
-    private Button btnCancel;
-    private EditText etNewTask;
-    private DatePicker etNewTaskDate;
+
     private ListView lvTodos;
     private LinearLayout llControlButtons;
     private LinearLayout llNewTaskButtons;
@@ -37,6 +30,7 @@ public class MainActivity extends Activity {
     private Cursor todoCursor;
     private List<TodoTask> tasks;
     private TodoTasksAdapter listAdapter;
+    Intent addNewTask = new Intent(MainActivity.this, NewTaskActivity.class);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,10 +44,6 @@ public class MainActivity extends Activity {
     private void initUiElements() {
         btnAddNew = (Button) findViewById(R.id.btnAddNew);
         btnClearCompleted = (Button) findViewById(R.id.btnClearCompleted);
-        btnSave = (Button) findViewById(R.id.btnSave);
-        btnCancel = (Button) findViewById(R.id.btnCancel);
-        etNewTask = (EditText) findViewById(R.id.etNewTask);
-        etNewTaskDate = (DatePicker) findViewById(R.id.etNewTaskDate);
         lvTodos = (ListView) findViewById(R.id.lvTodos);
         llControlButtons = (LinearLayout) findViewById(R.id.llControlButtons);
         llNewTaskButtons = (LinearLayout) findViewById(R.id.llNewTaskButtons);
@@ -137,12 +127,6 @@ public class MainActivity extends Activity {
                     case R.id.btnAddNew:
                         addNewTask();
                         break;
-                    case R.id.btnSave:
-                        saveNewTask();
-                        break;
-                    case R.id.btnCancel:
-                        cancelNewTask();
-                        break;
                     case R.id.btnClearCompleted:
                         clearCompletedTasks();
                         break;
@@ -150,72 +134,18 @@ public class MainActivity extends Activity {
                         break;
                 }
             }
-        };
-        btnAddNew.setOnClickListener(onClickListener);
+        };;
+        btnAddNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, NewTaskActivity.class));
+            }
+        });
         btnClearCompleted.setOnClickListener(onClickListener);
-        btnSave.setOnClickListener(onClickListener);
-        btnCancel.setOnClickListener(onClickListener);
-    }
-
-    private void showOnlyNewTaskPanel() {
-        setVisibilityOf(llControlButtons, false);
-        setVisibilityOf(llNewTaskButtons, true);
-        setVisibilityOf(etNewTask, true);
-        setVisibilityOf(etNewTaskDate, true);
-    }
-
-    private void showOnlyControlPanel() {
-        setVisibilityOf(llControlButtons, true);
-        setVisibilityOf(llNewTaskButtons, false);
-        setVisibilityOf(etNewTask, false);
-        setVisibilityOf(etNewTaskDate, false);
-    }
-
-    private void setVisibilityOf(View v, boolean visible) {
-        int visibility = visible ? View.VISIBLE : View.GONE;
-        v.setVisibility(visibility);
-    }
-
-    private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(etNewTask.getWindowToken(), 0);
-        imm.hideSoftInputFromWindow(etNewTaskDate.getWindowToken(), 0);
     }
 
     private void addNewTask(){
-        showOnlyNewTaskPanel();
-    }
-
-    private void saveNewTask(){
-        String taskDescription = etNewTask.getText().toString();
-        String taskYear = String.valueOf(etNewTaskDate.getYear());
-
-        String taskMonth = String.valueOf(etNewTaskDate.getMonth());
-        if(taskMonth.length() == 1)
-            taskMonth = '0' + taskMonth;
-
-        String taskDay = String.valueOf(etNewTaskDate.getDayOfMonth());
-        if(taskDay.length() == 1)
-            taskDay = '0' + taskDay;
-
-        String taskDate = taskYear + '-' + taskMonth + '-' + taskDay;
-        if(taskDescription.equals("")){
-            etNewTask.setError("Your task description couldn't be empty string.");
-        } else {
-            todoDbAdapter.insertTodo(taskDescription, taskDate);
-            etNewTask.setText("");
-            //etNewTaskDate.setText("");
-            hideKeyboard();
-            showOnlyControlPanel();
-        }
-
-        updateListViewData();
-    }
-
-    private void cancelNewTask() {
-        etNewTask.setText("");
-        //etNewTaskDate.setText("");
-        showOnlyControlPanel();
+        MainActivity.this.startActivity(addNewTask);
     }
 
     private void clearCompletedTasks(){

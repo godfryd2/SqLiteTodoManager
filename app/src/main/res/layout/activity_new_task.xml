@@ -4,29 +4,39 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/lvTodos"
+
+    <EditText
+        android:id="@+id/etNewTask"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"></ListView>
+        android:hint="@string/edittext_hint_new_task">
+    </EditText>
+
+    <DatePicker
+        android:id="@+id/etNewTaskDate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+    </DatePicker>
 
     <LinearLayout
-        android:id="@+id/llControlButtons"
+        android:id="@+id/llNewTaskButtons"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/btnAddNew"
+            android:id="@+id/btnSave"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/button_add"></Button>
+            android:text="@string/button_save"></Button>
 
         <Button
-            android:id="@+id/btnClearCompleted"
+            android:id="@+id/btnCancel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/button_clear"></Button>
+            android:text="@string/button_cancel"></Button>
     </LinearLayout>
+
 </LinearLayout>
