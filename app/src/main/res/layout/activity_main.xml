@@ -20,15 +20,15 @@
         <requestFocus></requestFocus>
     </EditText>
 
-    <EditText
+    <DatePicker
         android:id="@+id/etNewTaskDate"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/edittext_hint_new_task_date"
+        android:layout_weight="1"
         android:visibility="gone">
 
         <requestFocus></requestFocus>
-    </EditText>
+    </DatePicker>
 
     <LinearLayout
         android:id="@+id/llNewTaskButtons"

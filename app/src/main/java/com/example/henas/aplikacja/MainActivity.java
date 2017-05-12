@@ -3,6 +3,7 @@ package com.example.henas.aplikacja;
 import android.os.Bundle;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.example.henas.aplikacja.database.TodoDbAdapter;
@@ -16,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -26,7 +28,7 @@ public class MainActivity extends Activity {
     private Button btnSave;
     private Button btnCancel;
     private EditText etNewTask;
-    private EditText etNewTaskDate;
+    private DatePicker etNewTaskDate;
     private ListView lvTodos;
     private LinearLayout llControlButtons;
     private LinearLayout llNewTaskButtons;
@@ -51,7 +53,7 @@ public class MainActivity extends Activity {
         btnSave = (Button) findViewById(R.id.btnSave);
         btnCancel = (Button) findViewById(R.id.btnCancel);
         etNewTask = (EditText) findViewById(R.id.etNewTask);
-        etNewTaskDate = (EditText) findViewById(R.id.etNewTaskDate);
+        etNewTaskDate = (DatePicker) findViewById(R.id.etNewTaskDate);
         lvTodos = (ListView) findViewById(R.id.lvTodos);
         llControlButtons = (LinearLayout) findViewById(R.id.llControlButtons);
         llNewTaskButtons = (LinearLayout) findViewById(R.id.llNewTaskButtons);
@@ -186,15 +188,23 @@ public class MainActivity extends Activity {
 
     private void saveNewTask(){
         String taskDescription = etNewTask.getText().toString();
-        String taskDate = etNewTaskDate.getText().toString();
+        String taskYear = String.valueOf(etNewTaskDate.getYear());
+
+        String taskMonth = String.valueOf(etNewTaskDate.getMonth());
+        if(taskMonth.length() == 1)
+            taskMonth = '0' + taskMonth;
+
+        String taskDay = String.valueOf(etNewTaskDate.getDayOfMonth());
+        if(taskDay.length() == 1)
+            taskDay = '0' + taskDay;
+
+        String taskDate = taskYear + '-' + taskMonth + '-' + taskDay;
         if(taskDescription.equals("")){
             etNewTask.setError("Your task description couldn't be empty string.");
-        } else if(taskDate.equals("")) {
-            etNewTaskDate.setError("Your task date couldn't be empty string.");
         } else {
             todoDbAdapter.insertTodo(taskDescription, taskDate);
             etNewTask.setText("");
-            etNewTaskDate.setText("");
+            //etNewTaskDate.setText("");
             hideKeyboard();
             showOnlyControlPanel();
         }
@@ -204,7 +214,7 @@ public class MainActivity extends Activity {
 
     private void cancelNewTask() {
         etNewTask.setText("");
-        etNewTaskDate.setText("");
+        //etNewTaskDate.setText("");
         showOnlyControlPanel();
     }
 
