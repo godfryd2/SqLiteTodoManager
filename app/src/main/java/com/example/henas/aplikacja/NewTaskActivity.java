@@ -86,7 +86,10 @@ public class NewTaskActivity extends AppCompatActivity {
         if(taskDay.length() == 1)
             taskDay = '0' + taskDay;
 
-        String taskDate = taskYear + '-' + taskMonth + '-' + taskDay;
+        String taskHour = String.valueOf(etNewTaskTime.getCurrentHour());
+        String taskMinute = String.valueOf(etNewTaskTime.getCurrentMinute());
+
+        String taskDate = taskYear + '-' + taskMonth + '-' + taskDay + ' ' + taskHour + ':' + taskMinute;
         if(taskDescription.equals("")){
             etNewTask.setError("Your task description couldn't be empty string.");
         } else {
