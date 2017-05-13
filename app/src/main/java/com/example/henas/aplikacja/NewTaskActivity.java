@@ -8,9 +8,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.TimePicker;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import com.example.henas.aplikacja.database.TodoDbAdapter;
 
@@ -19,6 +18,7 @@ public class NewTaskActivity extends AppCompatActivity {
     private Button btnCancel;
     private EditText etNewTask;
     private DatePicker etNewTaskDate;
+    private TimePicker etNewTaskTime;
     private TodoDbAdapter todoDbAdapter;
 
     @Override
@@ -33,7 +33,9 @@ public class NewTaskActivity extends AppCompatActivity {
         btnSave = (Button) findViewById(R.id.btnSave);
         btnCancel = (Button) findViewById(R.id.btnCancel);
         etNewTask = (EditText) findViewById(R.id.etNewTask);
-        etNewTaskDate = (DatePicker) findViewById(R.id.etNewTaskDate);;
+        etNewTaskDate = (DatePicker) findViewById(R.id.etNewTaskDate);
+        etNewTaskTime = (TimePicker) findViewById(R.id.etNewTaskTime);
+        etNewTaskTime.setIs24HourView(true);
     }
 
     private void initButtonsOnClickListeners() {
@@ -60,6 +62,10 @@ public class NewTaskActivity extends AppCompatActivity {
             }
         });
     }
+    private void setVisibilityOf(View v, boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.GONE;
+        v.setVisibility(visibility);
+    }
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(etNewTask.getWindowToken(), 0);
@@ -68,7 +74,7 @@ public class NewTaskActivity extends AppCompatActivity {
     private void saveNewTask(){
         todoDbAdapter = new TodoDbAdapter(getApplicationContext());
         todoDbAdapter.open();
-        
+
         String taskDescription = etNewTask.getText().toString();
         String taskYear = String.valueOf(etNewTaskDate.getYear());
 
