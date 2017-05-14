@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Aplikacja.iml" filepath="$PROJECT_DIR$/Aplikacja.iml" />
       <module fileurl="file://$PROJECT_DIR$/SqLiteTodoManager.iml" filepath="$PROJECT_DIR$/SqLiteTodoManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
