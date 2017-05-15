@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
+import static com.example.henas.aplikacja.R.layout.notification;
+
 
 /**
  * Created by Henas on 15.05.2017.
@@ -36,16 +38,22 @@ public class MyAlarmService extends Service {
         super.onStartCommand(intent, flags, startId);
         mManager = (NotificationManager) this.getApplicationContext().getSystemService(this.getApplicationContext().NOTIFICATION_SERVICE);
         Intent intent1 = new Intent(this.getApplicationContext(), NotificationView.class);
-        Notification notification = new Notification.Builder(this.getApplicationContext())
-                .setContentTitle("Menadżer zadań")
-                .setContentText(NewTaskActivity.getDescription())
-                .setSmallIcon(R.mipmap.icon)
-                .build();
+        NotificationCompat.Builder Builder =
+                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.icon)
+                        .setContentTitle("Menadżer zadań")
+                        .setContentText(NewTaskActivity.getDescription())
+                        .setDefaults(Notification.DEFAULT_SOUND |
+                                Notification.DEFAULT_VIBRATE)
+                        .setSound(
+                                RingtoneManager.getDefaultUri(
+                                        RingtoneManager.TYPE_NOTIFICATION))
+                        .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
+                        .setLights(Color.GREEN, 100, 100);
         intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this.getApplicationContext(), 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-        mManager.notify(0, notification);
+        mManager.notify(0, Builder.build());
 
         return startId;
 
