@@ -1,45 +1,43 @@
 package com.example.henas.aplikacja;
 
 import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.TimePicker;
 import android.widget.EditText;
-import java.util.Calendar;
-import java.util.Date;
+import android.widget.TimePicker;
 
 import com.example.henas.aplikacja.database.TodoDbAdapter;
-import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import static java.util.Calendar.getInstance;
+import java.util.Calendar;
 
 public class NewTaskActivity extends AppCompatActivity {
     private Button btnSave;
     private Button btnCancel;
-    private EditText etNewTask;
+    private static EditText etNewTask;
     private DatePicker etNewTaskDate;
     private TimePicker etNewTaskTime;
     private TodoDbAdapter todoDbAdapter;
     private GoogleApiClient client;
+    public static String description;
+
+    public static String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,65 +84,40 @@ public class NewTaskActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(etNewTaskDate.getWindowToken(), 0);
     }
 
-
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private void addNotification(String text) {
-        Calendar cal = getInstance();
-        System.out.println("SART"+cal.getTimeInMillis());
-        NotificationCompat.Builder Builder =
-                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.icon)
-                        .setContentTitle("Menadżer zadań")
-                        .setContentText(text)
-                        .setShowWhen(cal.getTimeInMillis() == cal.getTimeInMillis()+30000)
-                        .setDefaults(Notification.DEFAULT_SOUND |
-                                Notification.DEFAULT_VIBRATE)
-                        .setSound(
-                                RingtoneManager.getDefaultUri(
-                                        RingtoneManager.TYPE_NOTIFICATION))
-                        .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
-                        .setLights(Color.GREEN, 100, 100);
-        Intent resultIntent = new Intent(this, NotificationView.class);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(NotificationView.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        PendingIntent.FLAG_UPDATE_CURRENT,
-                        0
-                );
-        Builder.setContentIntent(resultPendingIntent);
-        NotificationManager NotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        NotificationManager.notify(0, Builder.build());
-        System.out.println("STOP"+cal.getTimeInMillis());
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private void saveNewTask() {
+    public void saveNewTask() {
         todoDbAdapter = new TodoDbAdapter(getApplicationContext());
         todoDbAdapter.open();
+        Calendar calendar = Calendar.getInstance();
 
         String taskDescription = etNewTask.getText().toString();
+        setDescription(taskDescription);
         String taskYear = String.valueOf(etNewTaskDate.getYear());
+        calendar.set(Calendar.YEAR, etNewTaskDate.getYear());
 
         String taskMonth = String.valueOf(etNewTaskDate.getMonth());
+        calendar.set(Calendar.MONTH, etNewTaskDate.getMonth());
         if (taskMonth.length() == 1)
             taskMonth = '0' + taskMonth;
 
         String taskDay = String.valueOf(etNewTaskDate.getDayOfMonth());
+        calendar.set(Calendar.DAY_OF_MONTH, etNewTaskDate.getDayOfMonth());
         if (taskDay.length() == 1)
             taskDay = '0' + taskDay;
 
         String taskHour = String.valueOf(etNewTaskTime.getCurrentHour());
+        calendar.set(Calendar.HOUR_OF_DAY, etNewTaskTime.getCurrentHour());
         if (taskHour.length() == 1)
             taskHour = '0' + taskHour;
 
         String taskMinute = String.valueOf(etNewTaskTime.getCurrentMinute());
+        calendar.set(Calendar.MINUTE, etNewTaskTime.getCurrentMinute());
         if (taskMinute.length() == 1)
             taskMinute = '0' + taskMinute;
+
+        calendar.set(Calendar.SECOND, 0);
+
+        calendar.set(Calendar.AM_PM, Calendar.PM);
 
         String taskDate = taskYear + '-' + taskMonth + '-' + taskDay + ' ' + taskHour + ':' + taskMinute;
         if (taskDescription.equals("")) {
@@ -153,7 +126,14 @@ public class NewTaskActivity extends AppCompatActivity {
             todoDbAdapter.insertTodo(taskDescription, taskDate);
             etNewTask.setText("");
             hideKeyboard();
-            addNotification(taskDescription);
+
+            Intent myIntent = new Intent(NewTaskActivity.this, MyReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(NewTaskActivity.this, 0, myIntent, 0);
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+
+
             startActivity(new Intent(NewTaskActivity.this, MainActivity.class));
         }
     }
@@ -161,41 +141,5 @@ public class NewTaskActivity extends AppCompatActivity {
     private void cancelNewTask() {
         etNewTask.setText("");
         startActivity(new Intent(NewTaskActivity.this, MainActivity.class));
-    }
-
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("NewTask Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
     }
 }
