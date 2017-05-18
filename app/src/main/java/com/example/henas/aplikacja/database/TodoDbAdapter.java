@@ -4,14 +4,6 @@ package com.example.henas.aplikacja.database;
  * Created by Henas on 07.11.2016.
  */
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-
-import java.sql.Date;
-import java.sql.SQLException;
-import com.example.henas.aplikacja.model.TodoTask;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -19,6 +11,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.example.henas.aplikacja.model.TodoTask;
 
 public class TodoDbAdapter {
     private static final String DEBUG_TAG = "SqLiteTodoManager";
@@ -44,12 +38,17 @@ public class TodoDbAdapter {
     public static final String COMPLETED_OPTIONS = "INTEGER DEFAULT 0";
     public static final int COMPLETED_COLUMN = 3;
 
+    public static final String KEY_STATUS = "updateStatus";
+    public static final String STATUS_OPTIONS = "TEXT NOT NULL";
+    public static final int STATUS_COLUMN = 4;
+
     private static final String DB_CREATE_TODO_TABLE =
             "CREATE TABLE " + DB_TODO_TABLE + "( " +
                     KEY_ID + " " + ID_OPTIONS + ", " +
                     KEY_DESCRIPTION + " " + DESCRIPTION_OPTIONS + ", " +
                     KEY_DATE + " " + DATE_OPTIONS + ", " +
-                    KEY_COMPLETED + " " + COMPLETED_OPTIONS +
+                    KEY_COMPLETED + " " + COMPLETED_OPTIONS + ", " +
+                    KEY_STATUS + " " + STATUS_OPTIONS +
                     ");";
     private static final String DROP_TODO_TABLE =
             "DROP TABLE IF EXISTS " + DB_TODO_TABLE;
@@ -106,6 +105,7 @@ public class TodoDbAdapter {
         ContentValues newTodoValues = new ContentValues();
         newTodoValues.put(KEY_DESCRIPTION, description);
         newTodoValues.put(KEY_DATE, date);
+        newTodoValues.put(KEY_STATUS, "no");
         return db.insert(DB_TODO_TABLE, null, newTodoValues);
     }
 
@@ -114,16 +114,18 @@ public class TodoDbAdapter {
         String description = task.getDescription();
         String date = task.getDate();
         boolean completed = task.isCompleted();
-        return updateTodo(id, description, date, completed);
+        String status = task.getStatus();
+        return updateTodo(id, description, date, completed, status);
     }
 
-    public boolean updateTodo(long id, String description, String date, boolean completed) {
+    public boolean updateTodo(long id, String description, String date, boolean completed, String status) {
         String where = KEY_ID + "=" + id;
         int completedTask = completed ? 1 : 0;
         ContentValues updateTodoValues = new ContentValues();
         updateTodoValues.put(KEY_DESCRIPTION, description);
         updateTodoValues.put(KEY_DATE, date);
         updateTodoValues.put(KEY_COMPLETED, completedTask);
+        updateTodoValues.put(KEY_STATUS, status);
         return db.update(DB_TODO_TABLE, updateTodoValues, where, null) > 0;
     }
 
@@ -133,12 +135,12 @@ public class TodoDbAdapter {
     }
 
     public Cursor getAllTodos() {
-        String[] columns = {KEY_ID, KEY_DESCRIPTION, KEY_DATE, KEY_COMPLETED};
+        String[] columns = {KEY_ID, KEY_DESCRIPTION, KEY_DATE, KEY_COMPLETED, KEY_STATUS};
         return db.query(DB_TODO_TABLE, columns, null, null, null, null, null);
     }
 
     public TodoTask getTodo(long id) {
-        String[] columns = {KEY_ID, KEY_DESCRIPTION, KEY_DATE, KEY_COMPLETED};
+        String[] columns = {KEY_ID, KEY_DESCRIPTION, KEY_DATE, KEY_COMPLETED, KEY_STATUS};
         String where = KEY_ID + "=" + id;
         Cursor cursor = db.query(DB_TODO_TABLE, columns, where, null, null, null, null);
         TodoTask task = null;
@@ -146,8 +148,33 @@ public class TodoDbAdapter {
             String description = cursor.getString(DESCRIPTION_COLUMN);
             String date = cursor.getString(DATE_COLUMN);
             boolean completed = cursor.getInt(COMPLETED_COLUMN) > 0 ? true : false;
-            task = new TodoTask(id, description, date, completed);
+            String status = cursor.getString(STATUS_COLUMN);
+            task = new TodoTask(id, description, date, completed, status);
         }
         return task;
     }
+
+    /**
+     * Compose JSON out of SQLite records
+     * @return
+     */
+    /*public String composeJSONfromSQLite(){
+        ArrayList<HashMap<String, String>> wordList;
+        wordList = new ArrayList<HashMap<String, String>>();
+        String selectQuery = "SELECT  * FROM todo where udpateStatus = '"+"no"+"'";
+        SQLiteDatabase database = this.getWritableDatabase();
+        Cursor cursor = database.rawQuery(selectQuery, null);
+        if (cursor.moveToFirst()) {
+            do {
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put("userId", cursor.getString(0));
+                map.put("userName", cursor.getString(1));
+                wordList.add(map);
+            } while (cursor.moveToNext());
+        }
+        database.close();
+        Gson gson = new GsonBuilder().create();
+        //Use GSON to serialize Array List to JSON
+        return gson.toJson(wordList);
+    }*/
 }

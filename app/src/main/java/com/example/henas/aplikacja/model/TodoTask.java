@@ -10,11 +10,14 @@ public class TodoTask {
     private String date;
     private boolean completed;
 
-    public TodoTask(long id, String description, String date, boolean completed) {
+    private String status;
+
+    public TodoTask(long id, String description, String date, boolean completed, String status) {
         this.id = id;
         this.description = description;
         this.date = date;
         this.completed = completed;
+        this.status = status;
     }
 
     public long getId() {
@@ -33,9 +36,11 @@ public class TodoTask {
         this.description = description;
     }
 
-    public String getDate() {
-        return date;
-    }
+    public String getDate() { return date; }
+
+    public String getStatus() { return status; }
+
+    public void setStatus(String status) { this.status = status; }
 
     public void setDate(String date) {
         this.date = date;

@@ -1,15 +1,10 @@
 package com.example.henas.aplikacja;
 
-import android.content.Intent;
-import android.os.Bundle;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import com.example.henas.aplikacja.database.TodoDbAdapter;
-import com.example.henas.aplikacja.model.TodoTask;
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -17,6 +12,16 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
+import com.example.henas.aplikacja.database.TodoDbAdapter;
+import com.example.henas.aplikacja.model.TodoTask;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends Activity {
     private Button btnAddNew;
@@ -31,6 +36,11 @@ public class MainActivity extends Activity {
     private List<TodoTask> tasks;
     private TodoTasksAdapter listAdapter;
     Intent addNewTask = new Intent(MainActivity.this, NewTaskActivity.class);
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,6 +49,9 @@ public class MainActivity extends Activity {
         initUiElements();
         initListView();
         initButtonsOnClickListeners();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     private void initUiElements() {
@@ -70,7 +83,7 @@ public class MainActivity extends Activity {
 
     private Cursor getAllEntriesFromDb() {
         todoCursor = todoDbAdapter.getAllTodos();
-        if(todoCursor != null) {
+        if (todoCursor != null) {
             startManagingCursor(todoCursor);
             todoCursor.moveToFirst();
         }
@@ -78,20 +91,21 @@ public class MainActivity extends Activity {
     }
 
     private void updateTaskList() {
-        if(todoCursor != null && todoCursor.moveToFirst()) {
+        if (todoCursor != null && todoCursor.moveToFirst()) {
             do {
                 long id = todoCursor.getLong(TodoDbAdapter.ID_COLUMN);
                 String description = todoCursor.getString(TodoDbAdapter.DESCRIPTION_COLUMN);
                 String date = todoCursor.getString(TodoDbAdapter.DATE_COLUMN);
                 boolean completed = todoCursor.getInt(TodoDbAdapter.COMPLETED_COLUMN) > 0 ? true : false;
-                tasks.add(new TodoTask(id, description, date, completed));
-            } while(todoCursor.moveToNext());
+                String status = todoCursor.getString(TodoDbAdapter.STATUS_COLUMN);
+                tasks.add(new TodoTask(id, description, date, completed, status));
+            } while (todoCursor.moveToNext());
         }
     }
 
     @Override
     protected void onDestroy() {
-        if(todoDbAdapter != null)
+        if (todoDbAdapter != null)
             todoDbAdapter.close();
         super.onDestroy();
     }
@@ -102,10 +116,10 @@ public class MainActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View v, int position,
                                     long id) {
                 TodoTask task = tasks.get(position);
-                if(task.isCompleted()){
-                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), false);
+                if (task.isCompleted()) {
+                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), false, task.getStatus());
                 } else {
-                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), true);
+                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), true, task.getStatus());
                 }
                 updateListViewData();
             }
@@ -134,8 +148,9 @@ public class MainActivity extends Activity {
                         break;
                 }
             }
-        };;
-        btnAddNew.setOnClickListener(new View.OnClickListener() {
+        };
+        ;
+        btnAddNew.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, NewTaskActivity.class));
@@ -144,19 +159,55 @@ public class MainActivity extends Activity {
         btnClearCompleted.setOnClickListener(onClickListener);
     }
 
-    private void addNewTask(){
+    private void addNewTask() {
         MainActivity.this.startActivity(addNewTask);
     }
 
-    private void clearCompletedTasks(){
-        if(todoCursor != null && todoCursor.moveToFirst()) {
+    private void clearCompletedTasks() {
+        if (todoCursor != null && todoCursor.moveToFirst()) {
             do {
-                if(todoCursor.getInt(TodoDbAdapter.COMPLETED_COLUMN) == 1) {
+                if (todoCursor.getInt(TodoDbAdapter.COMPLETED_COLUMN) == 1) {
                     long id = todoCursor.getLong(TodoDbAdapter.ID_COLUMN);
                     todoDbAdapter.deleteTodo(id);
                 }
             } while (todoCursor.moveToNext());
         }
         updateListViewData();
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
     }
 }
