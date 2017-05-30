@@ -1,10 +1,13 @@
 package com.example.henas.aplikacja;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -12,6 +15,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.henas.aplikacja.database.TodoDbAdapter;
 import com.example.henas.aplikacja.model.TodoTask;
@@ -19,13 +23,25 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends Activity {
     private Button btnAddNew;
     private Button btnClearCompleted;
+    private Button btnSynch;
 
     private ListView lvTodos;
     private LinearLayout llControlButtons;
@@ -41,6 +57,7 @@ public class MainActivity extends Activity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    ProgressDialog prgDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,11 +69,17 @@ public class MainActivity extends Activity {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        //Initialize Progress Dialog properties
+        prgDialog = new ProgressDialog(this);
+        prgDialog.setMessage("Synching SQLite Data with Remote MySQL DB. Please wait...");
+        prgDialog.setCancelable(false);
     }
 
     private void initUiElements() {
         btnAddNew = (Button) findViewById(R.id.btnAddNew);
         btnClearCompleted = (Button) findViewById(R.id.btnClearCompleted);
+        btnSynch = (Button) findViewById(R.id.refresh);
         lvTodos = (ListView) findViewById(R.id.lvTodos);
         llControlButtons = (LinearLayout) findViewById(R.id.llControlButtons);
         llNewTaskButtons = (LinearLayout) findViewById(R.id.llNewTaskButtons);
@@ -144,6 +167,9 @@ public class MainActivity extends Activity {
                     case R.id.btnClearCompleted:
                         clearCompletedTasks();
                         break;
+                    case R.id.refresh:
+                        synchTask();
+                        break;
                     default:
                         break;
                 }
@@ -157,6 +183,72 @@ public class MainActivity extends Activity {
             }
         });
         btnClearCompleted.setOnClickListener(onClickListener);
+        btnSynch.setOnClickListener(onClickListener);
+    }
+
+    private void synchTask () {
+        System.out.println("WESZLO!!");
+        //System.out.println(todoDbAdapter.getAllUsers());
+        //System.out.println(todoDbAdapter.composeJSONfromSQLite());
+        syncSQLiteMySQLDB();
+    }
+
+
+    public void syncSQLiteMySQLDB(){
+        //Create AsycHttpClient object
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        ArrayList<HashMap<String, String>> userList =  todoDbAdapter.getAllUsers();
+        if(userList.size()!=0){
+            if(todoDbAdapter.dbSyncCount() != 0){
+                prgDialog.show();
+                params.put("todosJSON", todoDbAdapter.composeJSONfromSQLite());
+                System.out.println(todoDbAdapter.composeJSONfromSQLite());
+                client.post("http://godfryd2.unixstorm.org/sqlitemysqlsync/insertuser.php", params ,new AsyncHttpResponseHandler() {
+
+
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                        System.out.println(Arrays.toString(responseBody));
+                        prgDialog.hide();
+                        try {
+                            JSONArray arr = new JSONArray(responseBody);
+                            System.out.println(arr.length());
+                            for(int i=0; i<arr.length();i++){
+                                JSONObject obj = (JSONObject)arr.get(i);
+                                System.out.println(obj.get("id"));
+                                System.out.println(obj.get("status"));
+                                todoDbAdapter.updateSyncStatus(obj.get("id").toString(),obj.get("status").toString());
+                            }
+                            Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            // TODO Auto-generated catch block
+                            Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                        }
+                    }
+
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                        // TODO Auto-generated method stub
+                        prgDialog.hide();
+                        if(statusCode == 404){
+                            Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                        }else if(statusCode == 500){
+                            Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                        }else{
+                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            }else{
+                Toast.makeText(getApplicationContext(), "SQLite and Remote MySQL DBs are in Sync!", Toast.LENGTH_LONG).show();
+            }
+        }else{
+            Toast.makeText(getApplicationContext(), "No data in SQLite DB, please do enter User name to perform Sync action", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void addNewTask() {
