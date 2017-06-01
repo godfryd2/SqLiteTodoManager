@@ -217,9 +217,9 @@ public class MainActivity extends Activity {
                             System.out.println(arr.length());
                             for(int i=0; i<arr.length();i++){
                                 JSONObject obj = (JSONObject)arr.get(i);
-                                System.out.println(obj.get("id"));
-                                System.out.println(obj.get("status"));
-                                todoDbAdapter.updateSyncStatus(obj.get("id").toString(),obj.get("status").toString());
+                                System.out.println(obj.get("_id"));
+                                System.out.println(obj.get("updateStatus"));
+                                todoDbAdapter.updateSyncStatus(obj.get("_id").toString(),obj.get("updateStatus").toString());
                             }
                             Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {

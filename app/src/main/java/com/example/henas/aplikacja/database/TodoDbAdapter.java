@@ -200,8 +200,8 @@ public class TodoDbAdapter {
                 HashMap<String, String> map = new HashMap<String, String>();
                 map.put("_id", cursor.getString(0));
                 map.put("description", cursor.getString(1));
-                map.put("date", cursor.getString(0));
-                map.put("complete", cursor.getString(1));
+                map.put("date", cursor.getString(2));
+                map.put("complete", cursor.getString(3));
                 wordList.add(map);
             } while (cursor.moveToNext());
         }
