@@ -51,13 +51,10 @@ public class MainActivity extends Activity {
     private List<TodoTask> tasks;
     private TodoTasksAdapter listAdapter;
     Intent addNewTask = new Intent(MainActivity.this, NewTaskActivity.class);
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
+
     private GoogleApiClient client;
     ProgressDialog prgDialog;
-    static JSONObject jsonObj = null;
+    TodoDbAdapter controller = new TodoDbAdapter(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,16 +63,17 @@ public class MainActivity extends Activity {
         initUiElements();
         initListView();
         initButtonsOnClickListeners();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        ArrayList<HashMap<String, String>> todoList =  controller.getAllTasks();
 
-        //Initialize Progress Dialog properties
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        Toast.makeText(getApplicationContext(), controller.getSyncStatus(), Toast.LENGTH_LONG).show();
+        //Inicjalizacja okna dialogowego
         prgDialog = new ProgressDialog(this);
-        prgDialog.setMessage("Synching SQLite Data with Remote MySQL DB. Please wait...");
+        prgDialog.setMessage("STrwa synchrnizacja z zewnętrzną bazą danych. Proszę czekać...");
         prgDialog.setCancelable(false);
     }
 
+    //Inicjalizacja elementów interfejsu
     private void initUiElements() {
         btnAddNew = (Button) findViewById(R.id.btnAddNew);
         btnClearCompleted = (Button) findViewById(R.id.btnClearCompleted);
@@ -85,11 +83,13 @@ public class MainActivity extends Activity {
         llNewTaskButtons = (LinearLayout) findViewById(R.id.llNewTaskButtons);
     }
 
+    //Inicjalizacja klikalnej listy zadań
     private void initListView() {
         fillListViewData();
         initListViewOnItemClick();
     }
 
+    //Wypełnianie listy zadań
     private void fillListViewData() {
         todoDbAdapter = new TodoDbAdapter(getApplicationContext());
         todoDbAdapter.open();
@@ -98,12 +98,14 @@ public class MainActivity extends Activity {
         lvTodos.setAdapter(listAdapter);
     }
 
+    //Pobieranie listy zadań
     private void getAllTasks() {
         tasks = new ArrayList<TodoTask>();
         todoCursor = getAllEntriesFromDb();
         updateTaskList();
     }
 
+    //Pobieranie wszystkich zadań z wewnętrznej bazy danych
     private Cursor getAllEntriesFromDb() {
         todoCursor = todoDbAdapter.getAllTodos();
         if (todoCursor != null) {
@@ -113,6 +115,7 @@ public class MainActivity extends Activity {
         return todoCursor;
     }
 
+    //Aktualizacja listy zadań
     private void updateTaskList() {
         if (todoCursor != null && todoCursor.moveToFirst()) {
             do {
@@ -156,6 +159,7 @@ public class MainActivity extends Activity {
         listAdapter.notifyDataSetChanged();
     }
 
+    //Obsługa przycisków
     private void initButtonsOnClickListeners() {
         OnClickListener onClickListener = new OnClickListener() {
             @Override
@@ -186,19 +190,20 @@ public class MainActivity extends Activity {
         btnSynch.setOnClickListener(onClickListener);
     }
 
+    //Obsługa przycisku synchronizacji
     private void synchTask () {
         System.out.println("WESZLO!!");
-        //System.out.println(todoDbAdapter.getAllUsers());
+        //System.out.println(todoDbAdapter.getAllTasks());
         //System.out.println(todoDbAdapter.composeJSONfromSQLite());
         syncSQLiteMySQLDB();
     }
 
-
+    //Synchronizowanie z zewnęrzną bazą danych
     public void syncSQLiteMySQLDB(){
         //Create AsycHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-        ArrayList<HashMap<String, String>> userList =  todoDbAdapter.getAllUsers();
+        ArrayList<HashMap<String, String>> userList =  todoDbAdapter.getAllTasks();
         if(userList.size()!=0){
             if(todoDbAdapter.dbSyncCount() != 0){
                 prgDialog.show();
@@ -210,16 +215,13 @@ public class MainActivity extends Activity {
                     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                        //System.out.println(Arrays.toString(responseBody));
                         prgDialog.hide();
                         try {
                             String content = new String(responseBody);
                             JSONArray arr = new JSONArray(content);
-                            //JSONArray arr = new JSONArray(new String(responseBody));
 
                             System.out.println("content: "+ content);
                             System.out.println("arr: "+arr);
-
 
                             for(int i=0; i<arr.length();i++){
                                 JSONObject obj = (JSONObject)arr.get(i);
@@ -227,10 +229,10 @@ public class MainActivity extends Activity {
                                 System.out.println(obj.get("updateStatus"));
                                 todoDbAdapter.updateSyncStatus(obj.get("_id").toString(), obj.get("updateStatus").toString());
                             }
-                            Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Synchronizacja się powiodła!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             // TODO Auto-generated catch block
-                            Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Wystąpił błąd (Odpowiedź z serwera jest nieprawidłowa)!", Toast.LENGTH_LONG).show();
                             e.printStackTrace();
                         }
                     }
@@ -240,26 +242,28 @@ public class MainActivity extends Activity {
                         // TODO Auto-generated method stub
                         prgDialog.hide();
                         if(statusCode == 404){
-                            Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Nie znaleziono żądanego zasobu!", Toast.LENGTH_LONG).show();
                         }else if(statusCode == 500){
-                            Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Coś poszło nie tak po stronie serwera!", Toast.LENGTH_LONG).show();
                         }else{
-                            Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet]", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Wystąpił niespodziewany błąd! (Sprawdź dostęp do internetu)", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
             }else{
-                Toast.makeText(getApplicationContext(), "SQLite and Remote MySQL DBs are in Sync!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Baza wewnętrzna i zewnętrzna są zsynchronizowane!", Toast.LENGTH_LONG).show();
             }
         }else{
-            Toast.makeText(getApplicationContext(), "No data in SQLite DB, please do enter User name to perform Sync action", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Brak danych w bazie, dodaj zadanie", Toast.LENGTH_LONG).show();
         }
     }
 
+    //Przejście do ekranu dodawania nowego zadania
     private void addNewTask() {
         MainActivity.this.startActivity(addNewTask);
     }
 
+    //Czyszczenie zakończonych zadań
     private void clearCompletedTasks() {
         if (todoCursor != null && todoCursor.moveToFirst()) {
             do {

@@ -159,11 +159,8 @@ public class TodoDbAdapter {
         return task;
     }
 
-    /**
-     * Get list of Users from SQLite DB as Array List
-     * @return
-     */
-    public ArrayList<HashMap<String, String>> getAllUsers() {
+    //Zwracanie listy zadań z wewnętrznej bazy danych
+    public ArrayList<HashMap<String, String>> getAllTasks() {
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<HashMap<String, String>>();
         String selectQuery = "SELECT  * FROM todo";
@@ -184,10 +181,7 @@ public class TodoDbAdapter {
         return wordList;
     }
 
-    /**
-     * Compose JSON out of SQLite records
-     * @return
-     */
+    //Tworzenie JSONa z danych z bazy wewnętrznej
     public String composeJSONfromSQLite(){
         ArrayList<HashMap<String, String>> wordList;
         wordList = new ArrayList<HashMap<String, String>>();
@@ -206,28 +200,21 @@ public class TodoDbAdapter {
             } while (cursor.moveToNext());
         }
         Gson gson = new GsonBuilder().create();
-        //Use GSON to serialize Array List to JSON
         return gson.toJson(wordList);
     }
 
-    /**
-     * Get Sync status of SQLite
-     * @return
-     */
+    //Wyświetlanie statusu synchronizacji
     public String getSyncStatus(){
         String msg = null;
         if(this.dbSyncCount() == 0){
-            msg = "SQLite and Remote MySQL DBs are in Sync!";
+            msg = "Baza wewnętrzna i zewnętrzna są zsynchronizowane!";
         }else{
-            msg = "DB Sync neededn";
+            msg = "Istnieją niezsynchronizowane dane!";
         }
         return msg;
     }
 
-    /**
-     * Get SQLite records that are yet to be Synced
-     * @return
-     */
+    //Zwracanie liczby niezsynchronizowanych zadań
     public int dbSyncCount(){
         int count = 0;
         String selectQuery = "SELECT  * FROM todo where updateStatus = '"+"no"+"'";
@@ -238,11 +225,7 @@ public class TodoDbAdapter {
         return count;
     }
 
-    /**
-     * Update Sync status against each User ID
-     * @param id
-     * @param status
-     */
+    //Aktualizacja statusów zsynchronizowanych zadań
     public void updateSyncStatus(String id, String status){
         open();
         SQLiteDatabase database = db;
