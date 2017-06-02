@@ -32,7 +32,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -58,6 +57,7 @@ public class MainActivity extends Activity {
      */
     private GoogleApiClient client;
     ProgressDialog prgDialog;
+    static JSONObject jsonObj = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -210,16 +210,22 @@ public class MainActivity extends Activity {
                     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                        System.out.println(Arrays.toString(responseBody));
+                        //System.out.println(Arrays.toString(responseBody));
                         prgDialog.hide();
                         try {
-                            JSONArray arr = new JSONArray(responseBody);
-                            System.out.println(arr.length());
+                            String content = new String(responseBody);
+                            JSONArray arr = new JSONArray(content);
+                            //JSONArray arr = new JSONArray(new String(responseBody));
+
+                            System.out.println("content: "+ content);
+                            System.out.println("arr: "+arr);
+
+
                             for(int i=0; i<arr.length();i++){
                                 JSONObject obj = (JSONObject)arr.get(i);
                                 System.out.println(obj.get("_id"));
                                 System.out.println(obj.get("updateStatus"));
-                                todoDbAdapter.updateSyncStatus(obj.get("_id").toString(),obj.get("updateStatus").toString());
+                                todoDbAdapter.updateSyncStatus(obj.get("_id").toString(), obj.get("updateStatus").toString());
                             }
                             Toast.makeText(getApplicationContext(), "DB Sync completed!", Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
@@ -229,8 +235,7 @@ public class MainActivity extends Activity {
                         }
                     }
 
-
-                    @Override
+             @Override
                     public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                         // TODO Auto-generated method stub
                         prgDialog.hide();
