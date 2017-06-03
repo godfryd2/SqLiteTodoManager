@@ -95,7 +95,7 @@ public class NewTaskActivity extends AppCompatActivity {
         String taskYear = String.valueOf(etNewTaskDate.getYear());
         calendar.set(Calendar.YEAR, etNewTaskDate.getYear());
 
-        String taskMonth = String.valueOf(etNewTaskDate.getMonth());
+        String taskMonth = String.valueOf(etNewTaskDate.getMonth()+1);
         calendar.set(Calendar.MONTH, etNewTaskDate.getMonth());
         if (taskMonth.length() == 1)
             taskMonth = '0' + taskMonth;

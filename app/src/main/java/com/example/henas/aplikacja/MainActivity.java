@@ -192,9 +192,6 @@ public class MainActivity extends Activity {
 
     //Obsługa przycisku synchronizacji
     private void synchTask () {
-        System.out.println("WESZLO!!");
-        //System.out.println(todoDbAdapter.getAllTasks());
-        //System.out.println(todoDbAdapter.composeJSONfromSQLite());
         syncSQLiteMySQLDB();
     }
 
@@ -209,7 +206,7 @@ public class MainActivity extends Activity {
                 prgDialog.show();
                 params.put("todosJSON", todoDbAdapter.composeJSONfromSQLite());
                 System.out.println(todoDbAdapter.composeJSONfromSQLite());
-                client.post("http://godfryd2.unixstorm.org/sqlitemysqlsync/insertuser.php", params ,new AsyncHttpResponseHandler() {
+                client.post("http://godfryd2.unixstorm.org/sqlitemysqlsync/inserttask.php", params ,new AsyncHttpResponseHandler() {
 
 
                     @RequiresApi(api = Build.VERSION_CODES.KITKAT)

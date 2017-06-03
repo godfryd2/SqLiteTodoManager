@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:visibility="visible">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            app:srcCompat="@mipmap/icon"
+            android:id="@+id/imageView"
+            android:background="@color/colorPrimary"
+            android:layout_weight="0.69" />
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="164dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right"
+            android:id="@+id/textView"
+            tools:text="Menadżer Zadań"
+            android:layout_weight="1"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/background_light"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            tools:textAlignment="center" />
+
+    </LinearLayout>
 
     <Button
         android:text="SYNCHRONIZUJ"
