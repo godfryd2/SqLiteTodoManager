@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
         Toast.makeText(getApplicationContext(), controller.getSyncStatus(), Toast.LENGTH_LONG).show();
         //Inicjalizacja okna dialogowego
         prgDialog = new ProgressDialog(this);
-        prgDialog.setMessage("STrwa synchrnizacja z zewnętrzną bazą danych. Proszę czekać...");
+        prgDialog.setMessage("Trwa synchrnizacja z zewnętrzną bazą danych. Proszę czekać...");
         prgDialog.setCancelable(false);
     }
 
@@ -143,9 +143,9 @@ public class MainActivity extends Activity {
                                     long id) {
                 TodoTask task = tasks.get(position);
                 if (task.isCompleted()) {
-                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), false, task.getStatus());
+                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), false, "no");
                 } else {
-                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), true, task.getStatus());
+                    todoDbAdapter.updateTodo(task.getId(), task.getDescription(), task.getDate(), true, "no");
                 }
                 updateListViewData();
             }

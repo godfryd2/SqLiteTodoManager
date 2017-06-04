@@ -65,13 +65,7 @@ public class MyAlarmService extends Service {
         mNotificationManager.notify(0, Builder.build());
 
 
-
-
         PendingIntent.getActivity(this.getApplicationContext(), 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        //PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this.getApplicationContext(), 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        //mManager.notify(0, Builder.build());
 
         return startId;
     }
