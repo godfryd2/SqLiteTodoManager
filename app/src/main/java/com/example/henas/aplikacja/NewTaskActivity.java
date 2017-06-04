@@ -136,10 +136,12 @@ public class NewTaskActivity extends AppCompatActivity {
 
             startActivity(new Intent(NewTaskActivity.this, MainActivity.class));
         }
+        finish();
     }
 
     private void cancelNewTask() {
         etNewTask.setText("");
         startActivity(new Intent(NewTaskActivity.this, MainActivity.class));
+        finish();
     }
 }

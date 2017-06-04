@@ -257,6 +257,7 @@ public class MainActivity extends Activity {
 
     //Przejście do ekranu dodawania nowego zadania
     private void addNewTask() {
+        finish();
         MainActivity.this.startActivity(addNewTask);
     }
 
