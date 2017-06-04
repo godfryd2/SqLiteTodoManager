@@ -117,7 +117,17 @@ public class NewTaskActivity extends AppCompatActivity {
 
         calendar.set(Calendar.SECOND, 0);
 
-        calendar.set(Calendar.AM_PM, Calendar.PM);
+
+        System.out.println("etNewTaskTime.getCurrentHour(): " + etNewTaskTime.getCurrentHour());
+
+        if(etNewTaskTime.getCurrentHour() > 12) {
+            calendar.set(Calendar.AM_PM, Calendar.PM);
+            System.out.println("PM");
+        }
+        else {
+            calendar.set(Calendar.AM_PM, Calendar.AM);
+            System.out.println("AM");
+        }
 
         String taskDate = taskYear + '-' + taskMonth + '-' + taskDay + ' ' + taskHour + ':' + taskMinute;
         if (taskDescription.equals("")) {
@@ -133,10 +143,9 @@ public class NewTaskActivity extends AppCompatActivity {
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 
-
+            finish();
             startActivity(new Intent(NewTaskActivity.this, MainActivity.class));
         }
-        finish();
     }
 
     private void cancelNewTask() {
